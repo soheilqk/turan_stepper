@@ -24,30 +24,47 @@ class TuranStep {
       cursor: index > currentStep ? MouseCursor.defer : SystemMouseCursors.click,
       child: GestureDetector(
         onTap: index > currentStep ? null : () => onStepTapped(index),
+        child: Container(
+          height: 30,
+          width: 30,
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            shape: BoxShape.circle,
+            boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black12, spreadRadius: 3)],
+          ),
+          child: index < currentStep
+              ? CircleAvatar(
+                  child: Icon(
+                    Icons.check,
+                    color: contentColor,
+                  ),
+                  backgroundColor: backgroundColor,
+                )
+              : Center(
+                  child: Text(
+                    '${index + 1}',
+                    style: TextStyle(color: contentColor, fontWeight: FontWeight.w600),
+                  ),
+                ),
+        ),
+      ),
+    );
+  }
+
+  Widget titles({
+    required int index,
+    required int currentStep,
+    required Function(int stepIndex) onStepTapped,
+  }) {
+    return MouseRegion(
+      cursor: index > currentStep ? MouseCursor.defer : SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: index > currentStep ? null : () => onStepTapped(index),
         child: Column(
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black12, spreadRadius: 3)],
-              ),
-              child: CircleAvatar(
-                child: index < currentStep
-                    ? Icon(
-                        Icons.check,
-                        color: contentColor,
-                      )
-                    : Text(
-                        '${index + 1}',
-                        style: TextStyle(color: contentColor, fontWeight: FontWeight.w600),
-                      ),
-                backgroundColor: backgroundColor,
-              ),
-            ),
             if (title != null) ...[
               SizedBox(height: 6),
-              title!,
+              SizedBox(width:140,child: FittedBox(fit:BoxFit.scaleDown,child: title!)),
             ],
             if (subtitle != null) ...[
               SizedBox(height: 6),
@@ -60,12 +77,3 @@ class TuranStep {
   }
 }
 
-class TStepButtonTexts{
-  final String? forward;
-  final String? submit;
-  final String? back;
-  final String? close;
-
-  TStepButtonTexts({this.forward, this.submit, this.back, this.close,});
-
-}

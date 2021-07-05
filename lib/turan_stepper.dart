@@ -5,25 +5,19 @@ class TuranStepper extends StatefulWidget {
   final currentStep;
   final List<TuranStep> steps;
   final Function(int stepIndex) onStepTapped;
-  final void Function() onContinue;
-  final void Function() onSubmit;
-  final void Function() onClose;
   final Color? primaryColor;
   final Color? secondaryColor;
   final Color? dividerColor;
-  final TStepButtonTexts? buttonTexts;
+  final List<Widget> buttons;
 
   const TuranStepper({
     this.currentStep = 0,
     required this.steps,
     required this.onStepTapped,
-    required this.onContinue,
-    required this.onSubmit,
-    required this.onClose,
     this.primaryColor = const Color(0xFF03C7C3),
     this.secondaryColor = Colors.white,
     this.dividerColor = const Color(0xFF03C7C3),
-    this.buttonTexts = const TStepButtonTexts(),
+    required this.buttons,
   });
 
   @override
@@ -33,6 +27,7 @@ class TuranStepper extends StatefulWidget {
 class _TuranStepperState extends State<TuranStepper> {
   Widget buildSteps() {
     final List<Widget> numberings = [];
+    final List<Widget> titles = [];
     widget.steps.forEach((element) {
       numberings.add(
         element.numbering(
@@ -43,20 +38,42 @@ class _TuranStepperState extends State<TuranStepper> {
           secondaryColor: widget.secondaryColor!,
         ),
       );
+
       if (widget.steps.length - 1 != widget.steps.indexOf(element)) {
         numberings.add(
           Expanded(
             child: Container(
-              margin: EdgeInsets.only(top: 12, left: 18, right: 18),
+              margin: EdgeInsets.only(top: 10, left: 18, right: 18),
               child: Divider(color: widget.dividerColor),
             ),
           ),
         );
       }
     });
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: numberings,
+    widget.steps.forEach((element) {
+      titles.add(
+        element.titles(
+          index: widget.steps.indexOf(element),
+          currentStep: widget.currentStep,
+          onStepTapped: widget.onStepTapped,
+        ),
+      );
+
+      if (widget.steps.length - 1 != widget.steps.indexOf(element)) {
+        titles.add(Expanded(child: Container()));
+      }
+    });
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 50),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: numberings,
+          ),
+        ),
+        Row(children: titles)
+      ],
     );
   }
 
@@ -69,7 +86,7 @@ class _TuranStepperState extends State<TuranStepper> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: EdgeInsets.symmetric(vertical: 6),
           child: buildSteps(),
         ),
         Expanded(
@@ -85,74 +102,10 @@ class _TuranStepperState extends State<TuranStepper> {
         Container(
           margin: EdgeInsets.all(8),
           child: Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: SizedBox(
-                  height: 35,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (widget.steps.length - 1 > widget.currentStep) {
-                        widget.onStepTapped(widget.currentStep + 1);
-                        widget.onContinue();
-                      } else
-                        widget.onSubmit();
-                    },
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(widget.primaryColor),
-                    ),
-                    child: Text(
-                      widget.steps.length - 1 > widget.currentStep ? widget.buttonTexts!.forward : widget.buttonTexts!.submit,
-                      style: TextStyle(color: widget.secondaryColor),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 8),
-              Expanded(
-                flex: 2,
-                child: SizedBox(
-                  height: 35,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (widget.currentStep == 0) {
-                        widget.onClose();
-                      } else
-                        widget.onStepTapped(widget.currentStep - 1);
-                    },
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(widget.primaryColor),
-                    ),
-                    child: Text(
-                      widget.currentStep == 0 ? widget.buttonTexts!.close : widget.buttonTexts!.back,
-                      style: TextStyle(color: widget.secondaryColor),
-                    ),
-                  ),
-                ),
-              ),
-              Spacer(
-                flex: 10,
-              )
-            ],
+            children: widget.buttons,
           ),
         ),
       ],
     );
   }
-}
-
-//
-
-class TStepButtonTexts {
-  final String forward;
-  final String submit;
-  final String back;
-  final String close;
-
-  const TStepButtonTexts({
-    this.forward = 'ادامه',
-    this.submit = 'تایید',
-    this.back = 'بازگشت',
-    this.close = 'بستن',
-  });
 }
